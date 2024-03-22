@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """This is the state class"""
-import os
+
 from sqlalchemy.ext.declarative import declarative_base
 from models.base_model import BaseModel, Base
 from sqlalchemy.orm import relationship
@@ -16,27 +16,21 @@ class State(BaseModel, Base):
         name: input name
     """
     __tablename__ = "states"
+    name = Column(String(128), nullable=False)
+    cities = relationship("City", cascade='all, delete, delete-orphan',
+                          backref="state")
 
-    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
-        name = Column(String(128), nullable=False)
-        cities = relationship("City", cascade='all, delete, delete-orphan',
-                              backref="state")
-
-    else:
-        @property
-        def cities(self):
-            """Returns city of a specified state"""
-            var = models.storage.all()
-            lista = []
-            result = []
-
-            for key in var:
-                city = key.replace('.', ' ')
-                city = shlex.split(city)
-
-                if (city[0] == 'City'):
-                    lista.append(var[key])
-            for elem in lista:
-                if (elem.state_id == self.id):
-                    result.append(elem)
-            return (result)
+    @property
+    def cities(self):
+        var = models.storage.all()
+        lista = []
+        result = []
+        for key in var:
+            city = key.replace('.', ' ')
+            city = shlex.split(city)
+            if (city[0] == 'City'):
+                lista.append(var[key])
+        for elem in lista:
+            if (elem.state_id == self.id):
+                result.append(elem)
+        return (result)
